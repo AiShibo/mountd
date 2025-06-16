@@ -1,0 +1,3 @@
+[submodule "libimsg"]
+	path = libimsg
+	url = https://github.com/koue/libimsg.git
