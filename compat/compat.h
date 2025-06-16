@@ -3,6 +3,7 @@
 #define pledge(...) (0)
 #define unveil(...) (0)
 #define XDR_CAST(proc) ((xdrproc_t)(uintptr_t)(proc))
+#define freezero(ptr, size) free(ptr)
 
 // typedef bool_t (*resultproc_t)(caddr_t, struct sockaddr_in *);
 
@@ -20,7 +21,6 @@
 #define _PATH_KLOG      "/dev/klog"
 #define	LIOCSFD		_IOW('l', 127, int)
 #define	KERN_MSGBUFSIZE		38
-#define freezero(ptr, size) free(ptr)
 #define DEF_WEAK(x)
 #define WRAP(x)(...)
 

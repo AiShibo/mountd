@@ -27,27 +27,26 @@ mountd.o: mountd.c /home/shibo/mountd/sbin/mountd/../../compat/compat.h \
   /usr/include/sys/_clock_id.h /usr/include/time.h \
   /usr/include/xlocale/_time.h /usr/include/sys/uio.h \
   /usr/include/sys/_uio.h /usr/include/sys/wait.h /usr/include/syslog.h \
-  /usr/include/rpc/rpc.h /usr/include/rpc/types.h \
-  /usr/include/netconfig.h /usr/include/netinet/in.h \
-  /usr/include/netinet6/in6.h \
+  /home/shibo/mountd/sbin/mountd/../../include/rpc/rpc.h \
+  /usr/include/rpc/types.h /usr/include/netconfig.h \
+  /usr/include/netinet/in.h /usr/include/netinet6/in6.h \
   /home/shibo/mountd/sbin/mountd/../../include/rpc/xdr.h \
-  /usr/include/rpc/auth.h /usr/include/rpc/clnt_stat.h \
+  /usr/include/rpc/auth.h \
+  /home/shibo/mountd/sbin/mountd/../../include/rpc/clnt_stat.h \
   /home/shibo/mountd/sbin/mountd/../../include/rpc/clnt.h \
-  /usr/include/sys/un.h /usr/include/rpc/clnt_soc.h \
+  /home/shibo/mountd/sbin/mountd/../../include/rpc/pmap_clnt.h \
   /usr/include/rpc/rpc_msg.h /usr/include/rpc/auth_unix.h \
-  /usr/include/rpc/auth_des.h /usr/include/rpc/svc.h \
-  /usr/include/rpc/svc_soc.h /usr/include/rpc/svc_auth.h \
-  /usr/include/rpc/pmap_clnt.h /usr/include/rpc/pmap_prot.h \
-  /usr/include/rpc/rpcb_clnt.h /usr/include/rpc/rpcb_prot.h \
-  /usr/include/rpc/rpcent.h \
+  /home/shibo/mountd/sbin/mountd/../../include/rpc/svc.h \
+  /usr/include/poll.h /usr/include/rpc/svc_auth.h \
+  /home/shibo/mountd/sbin/mountd/../../include/rpc/pmap_prot.h \
   /home/shibo/mountd/sbin/mountd/../../sys/nfs/rpcv2.h \
   /usr/include/nfs/nfsproto.h /usr/include/arpa/inet.h \
   /usr/include/ctype.h /usr/include/_ctype.h /usr/include/runetype.h \
   /usr/include/xlocale/_ctype.h /usr/include/errno.h /usr/include/grp.h \
-  /home/shibo/mountd/sbin/mountd/../../libimsg/src/lib/libutil/imsg.h \
+  /home/shibo/mountd/sbin/mountd/../../lib/libutil/imsg.h \
   /usr/include/netdb.h \
   /home/shibo/mountd/sbin/mountd/../../include/netgroup.h \
-  /usr/include/poll.h /usr/include/pwd.h /usr/include/signal.h \
+  /usr/include/pwd.h /usr/include/signal.h \
   /usr/include/machine/ucontext.h /usr/include/x86/ucontext.h \
   /usr/include/sys/_ucontext.h /usr/include/stdio.h \
   /usr/include/stdlib.h /usr/include/string.h /usr/include/strings.h \

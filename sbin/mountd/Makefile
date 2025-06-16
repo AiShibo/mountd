@@ -3,13 +3,18 @@
 PROG=	mountd
 MAN=	exports.5 mountd.8
 
+.PATH: ${.CURDIR}/../../lib/libutil
+.PATH: ${.CURDIR}/../../lib/libc/rpc
+SRCS+= mountd.c imsg.c imsg-buffer.c rpc_commondata.c svc.c
+
 LDADD=	-lutil
 DPADD=	${LIBUTIL}
 
 CFLAGS+= -I${.CURDIR}/../../sys
 CFLAGS+= -I${.CURDIR}/../../compat
 CFLAGS+= -I${.CURDIR}/../../include
-CFLAGS+= -I${.CURDIR}/../../libimsg/src/lib/libutil
+CFLAGS+= -I${.CURDIR}/../../lib/libutil
+
 
 .include <bsd.prog.mk>
 
