@@ -1,4 +1,5 @@
 svc.o: /home/shibo/mountd/sbin/mountd/../../lib/libc/rpc/svc.c \
+  /home/shibo/mountd/sbin/mountd/../../compat/compat.h \
   /usr/include/errno.h /usr/include/sys/cdefs.h /usr/include/stdlib.h \
   /usr/include/sys/_null.h /usr/include/sys/_types.h \
   /usr/include/machine/_types.h /usr/include/x86/_types.h \
