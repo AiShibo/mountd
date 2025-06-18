@@ -239,6 +239,46 @@ volatile sig_atomic_t gotchld;
 volatile sig_atomic_t gothup;
 volatile sig_atomic_t gotterm;
 
+
+int mount_with_nmount(struct statfs sfb) {
+    struct iovec iov[6];
+    int i = 0;
+
+    // "fstype"
+    iov[i].iov_base = "fstype";
+    iov[i].iov_len  = strlen("fstype") + 1;
+    i++;
+    iov[i].iov_base = sfb.f_fstypename;
+    iov[i].iov_len  = strlen(sfb.f_fstypename) + 1;
+    i++;
+
+    // "fspath"
+    iov[i].iov_base = "fspath";
+    iov[i].iov_len  = strlen("fspath") + 1;
+    i++;
+    iov[i].iov_base = sfb.f_mntonname;
+    iov[i].iov_len  = strlen(sfb.f_mntonname) + 1;
+    i++;
+
+    // "from"
+    iov[i].iov_base = "from";
+    iov[i].iov_len  = strlen("from") + 1;
+    i++;
+    iov[i].iov_base = sfb.f_mntfromname;
+    iov[i].iov_len  = strlen(sfb.f_mntfromname) + 1;
+    i++;
+
+    if (nmount(iov, i, sfb.f_flags | MNT_UPDATE) < 0) {
+        err(1, "nmount");
+        return -1;
+    }
+
+    printf("Updated mount of %s on %s (type: %s)\n",
+        sfb.f_mntfromname, sfb.f_mntonname, sfb.f_fstypename);
+    printf("success!\n");
+    return 0;
+}
+
 /*
  * Mountd server for NFS mount protocol as described in:
  * NFS: Network File System Protocol Specification, RFC1094, Appendix A
@@ -341,23 +381,88 @@ main(int argc, char *argv[])
 	if (debug)
 		fprintf(stderr, "Getting mount list.\n");
 	get_mountlist();
+	printf("after getting mount list!\n");
 
 	if ((udptransp = svcudp_create(RPC_ANYSOCK)) == NULL ||
 	    (tcptransp = svctcp_create(RPC_ANYSOCK, 0, 0)) == NULL) {
 		syslog(LOG_ERR, "Can't create socket");
+		printf("oops 1\n");
 		exit(1);
 	}
 	pmap_unset(RPCPROG_MNT, RPCMNT_VER1);
 	pmap_unset(RPCPROG_MNT, RPCMNT_VER3);
+	/*
 	if (!svc_register(udptransp, RPCPROG_MNT, RPCMNT_VER1, mntsrv, IPPROTO_UDP) ||
 	    !svc_register(udptransp, RPCPROG_MNT, RPCMNT_VER3, mntsrv, IPPROTO_UDP) ||
 	    !svc_register(tcptransp, RPCPROG_MNT, RPCMNT_VER1, mntsrv, IPPROTO_TCP) ||
 	    !svc_register(tcptransp, RPCPROG_MNT, RPCMNT_VER3, mntsrv, IPPROTO_TCP)) {
 		syslog(LOG_ERR, "Can't register mount");
+		printf("oops 2\n");
 		exit(1);
 	}
+	*/
+
+	/* UDP, version 1 */
+	if (!svc_register(udptransp,
+				RPCPROG_MNT,
+				RPCMNT_VER1,
+				mntsrv,
+				IPPROTO_UDP))
+	{
+				printf("svc_register UDP/RPCMNT_VER1 failed: "
+				"errno=%d (%s), rpc_err=%s\n",
+				errno, strerror(errno),
+				clnt_sperrno(rpc_createerr.cf_stat));
+		exit(1);
+	}
+
+	/* UDP, version 3 */
+	if (!svc_register(udptransp,
+				RPCPROG_MNT,
+				RPCMNT_VER3,
+				mntsrv,
+				IPPROTO_UDP))
+	{
+				printf("svc_register UDP/RPCMNT_VER3 failed: "
+				"errno=%d (%s), rpc_err=%s\n",
+				errno, strerror(errno),
+				clnt_sperrno(rpc_createerr.cf_stat));
+		exit(1);
+	}
+
+	/* TCP, version 1 */
+	if (!svc_register(tcptransp,
+				RPCPROG_MNT,
+				RPCMNT_VER1,
+				mntsrv,
+				IPPROTO_TCP))
+	{
+				printf("svc_register TCP/RPCMNT_VER1 failed: "
+				"errno=%d (%s), rpc_err=%s\n",
+				errno, strerror(errno),
+				clnt_sperrno(rpc_createerr.cf_stat));
+		exit(1);
+	}
+
+	/* TCP, version 3 */
+	if (!svc_register(tcptransp,
+				RPCPROG_MNT,
+				RPCMNT_VER3,
+				mntsrv,
+				IPPROTO_TCP))
+	{
+				printf("svc_register TCP/RPCMNT_VER3 failed: "
+				"errno=%d (%s), rpc_err=%s\n",
+				errno, strerror(errno),
+				clnt_sperrno(rpc_createerr.cf_stat));
+		exit(1);
+	}
+
+	printf("before\n");
 	mountd_svc_run();
+	printf("after\n");
 	syslog(LOG_ERR, "Mountd died");
+	printf("Mountd died\n");
 	exit(1);
 }
 
@@ -477,6 +582,7 @@ privchild(int sock)
 				printf("fspath: %s\n", sfb.f_mntonname);
 				printf("from:   %s\n", sfb.f_mntfromname);
 
+				/*
 				if (mount(sfb.f_fstypename, sfb.f_mntonname,
 				    sfb.f_flags | MNT_UPDATE, &args) == -1) {
 				    	error = errno;
@@ -486,6 +592,17 @@ privchild(int sock)
 					printf("oops!\n");
 					break;
 				}
+				*/
+
+				if (mount_with_nmount(sfb)) {
+				    	error = errno;
+				    	syslog(LOG_ERR, "mount: %m");
+					send_imsg(IMSG_EXPORT_RESP, &error,
+					    sizeof(error));
+					printf("oops!\n");
+					break;
+				}
+
 				error = 0;
 				send_imsg(IMSG_EXPORT_RESP, &error, sizeof(error));
 				break;
