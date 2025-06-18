@@ -1,3 +1,5 @@
+#include <compat.h>
+
 /*	$OpenBSD: svc.c,v 1.29 2015/10/05 01:23:17 deraadt Exp $ */
 
 /*

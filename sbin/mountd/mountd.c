@@ -1,3 +1,4 @@
+#define export_args oexport_args
 #include <compat.h>
 
 /*	$OpenBSD: mountd.c,v 1.98 2025/05/05 13:25:22 claudio Exp $	*/
@@ -72,6 +73,11 @@
 #include <stdarg.h>
 
 #define isterminated(str, size) (memchr((str), '\0', (size)) != NULL)
+
+struct ufs_args {
+	char    *fspec;                 /* block special device to mount */
+	struct  oexport_args export;    /* network export information */
+};
 
 /*
  * Structures for keeping the mount list and export list
@@ -466,12 +472,18 @@ privchild(int sock)
 				args.export_info = req->er_args;
 				args.export_info.ex_addr = &req->er_addr;
 				args.export_info.ex_mask = &req->er_mask;
+
+				printf("fstype: %s\n", sfb.f_fstypename);
+				printf("fspath: %s\n", sfb.f_mntonname);
+				printf("from:   %s\n", sfb.f_mntfromname);
+
 				if (mount(sfb.f_fstypename, sfb.f_mntonname,
 				    sfb.f_flags | MNT_UPDATE, &args) == -1) {
 				    	error = errno;
 				    	syslog(LOG_ERR, "mount: %m");
 					send_imsg(IMSG_EXPORT_RESP, &error,
 					    sizeof(error));
+					printf("oops!\n");
 					break;
 				}
 				error = 0;
