@@ -853,6 +853,7 @@ mountd_svc_run(void)
 		memcpy(pfd, svc_pollfd, svc_max_pollfd * sizeof(*pfd));
 
 		nready = poll(pfd, svc_max_pollfd, INFTIM);
+		printf("network poll funish! =========================\n");
 		switch (nready) {
 		case -1:
 			if (errno == EINTR)
@@ -863,6 +864,7 @@ mountd_svc_run(void)
 		case 0:
 			break;
 		default:
+			printf("normal poll\n");
 			svc_getreq_poll(pfd, nready);
 			break;
 		}
@@ -891,6 +893,9 @@ mntsrv(struct svc_req *rqstp, SVCXPRT *transp)
 	u_short sport;
 	long bad = 0;
 
+	printf("callback invoked!\n");
+	printf("sizeof transp is %d\n", sizeof(*transp));
+
 	saddr = transp->xp_raddr.sin_addr.s_addr;
 	sport = ntohs(transp->xp_raddr.sin_port);
 	switch (rqstp->rq_proc) {
@@ -899,6 +904,7 @@ mntsrv(struct svc_req *rqstp, SVCXPRT *transp)
 			syslog(LOG_ERR, "Can't send reply");
 		return;
 	case RPCMNT_MOUNT:
+		printf("case 1!\n");
 		if (debug)
 			fprintf(stderr, "Got mount request from %s\n",
 			    inet_ntoa(transp->xp_raddr.sin_addr));
@@ -986,10 +992,12 @@ mntsrv(struct svc_req *rqstp, SVCXPRT *transp)
 			syslog(LOG_ERR, "Can't send reply");
 		return;
 	case RPCMNT_DUMP:
+		printf("case 2!\n");
 		if (!svc_sendreply(transp, xdr_mlist, NULL))
 			syslog(LOG_ERR, "Can't send reply");
 		return;
 	case RPCMNT_UMOUNT:
+		printf("case 3!\n");
 		if (sport >= IPPORT_RESERVED) {
 			svcerr_weakauth(transp);
 			return;
@@ -1006,6 +1014,7 @@ mntsrv(struct svc_req *rqstp, SVCXPRT *transp)
 		del_mlist(inet_ntoa(transp->xp_raddr.sin_addr), dirpath);
 		return;
 	case RPCMNT_UMNTALL:
+		printf("case 4!\n");
 		if (sport >= IPPORT_RESERVED) {
 			svcerr_weakauth(transp);
 			return;
@@ -1018,8 +1027,21 @@ mntsrv(struct svc_req *rqstp, SVCXPRT *transp)
 		del_mlist(inet_ntoa(transp->xp_raddr.sin_addr), NULL);
 		return;
 	case RPCMNT_EXPORT:
-		if (!svc_sendreply(transp, xdr_explist, NULL))
+		printf("case 5!\n");
+
+		/*
+		if (!svc_sendreply(transp, xdr_explist, NULL)){
+			printf("svc_sendreply failed: %s\n", strerror(errno));
 			syslog(LOG_ERR, "Can't send reply");
+		}
+		*/
+
+		if (!svc_sendreply(transp, xdr_explist, NULL)) {
+			int saved_errno = errno;
+			printf("!!! svc_sendreply failed on fd=%d: %s\n",
+					transp->xp_sock, strerror(saved_errno));
+		}
+		
 		return;
 	default:
 		svcerr_noproc(transp);
